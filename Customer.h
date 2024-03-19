@@ -1,5 +1,3 @@
-
-
 #ifndef CUSTOMER_H
 #define CUSTOMER_H
 
@@ -11,12 +9,16 @@ private:
   std::string address;
 
 public:
-  Customer(std::string name, std::string address) {
-    this->name = name;
-    this->address = address;
-  }
-  std::string getName() { return name; }
-  std::string getAddress() { return address; }
+  // Default constructor with default values for name and address
+  Customer(std::string name = "John Doe",
+           std::string address = "123 Main Street")
+      : name(name), address(address) {}
+
+  // Accessor methods
+  std::string getName() const { return name; }
+  std::string getAddress() const { return address; }
+
+  // Mutator methods
   void setAddress(std::string address) { this->address = address; }
   void setName(std::string name) { this->name = name; }
 };
