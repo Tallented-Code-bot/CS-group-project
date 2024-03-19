@@ -1,12 +1,15 @@
 #ifndef CUSTOMER_H
 #define CUSTOMER_H
 
+#include "Account.h"
 #include <string>
+#include <vector>
 
 class Customer {
 private:
   std::string name;
   std::string address;
+  std::vector<Account> accounts;
 
 public:
   // Default constructor with default values for name and address
@@ -21,6 +24,11 @@ public:
   // Mutator methods
   void setAddress(std::string address) { this->address = address; }
   void setName(std::string name) { this->name = name; }
+
+  void addAccount(Account account) { accounts.push_back(account); }
+  std::vector<Account> getAccounts() { return accounts; }
+
+  float netWorth();
 };
 
 #endif

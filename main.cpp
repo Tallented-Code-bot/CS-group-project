@@ -1,7 +1,8 @@
-#include "CertificateDeposit.h"
 #include "Account.cpp"
 #include "Account.h"
+#include "CertificateDeposit.h"
 #include "Checking.h"
+#include "Customer.h"
 #include "MoneyMarket.h"
 #include "Savings.h"
 #include <iostream>
@@ -28,10 +29,10 @@ int main() {
   std::cin >> monthly_interest;
 
   // Create instances of different account types using user-provided details
-  CertificateDeposit cd(customer, balance, monthly_interest, 12, 20.0f);
-  Checking checking(customer, balance, monthly_interest);
-  MoneyMarket mm(customer, balance, monthly_interest, 15.0f, 50.0f);
-  Savings savings(customer, balance, monthly_interest, 10.0f);
+  CertificateDeposit cd(balance, monthly_interest, 12, 20.0f);
+  Checking checking(balance, monthly_interest);
+  MoneyMarket mm(balance, monthly_interest, 15.0f, 50.0f);
+  Savings savings(balance, monthly_interest, 10.0f);
 
   // Perform deposit operation for Checking account
   std::cout << "Enter amount to deposit into Checking account: ";

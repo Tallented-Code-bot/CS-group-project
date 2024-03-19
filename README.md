@@ -1,5 +1,9 @@
 # CS Group Project
 
+([Link to Github](https://github.com/Tallented-Code-bot/CS-group-project))
+
+This is the CS 162 group project, by Calvin Tallent and Dimitriy Shvets.
+
 
 
 
@@ -7,8 +11,14 @@
 
 ``` mermaid
 classDiagram
+    class Bank{
+       + users: vector~Customer~
+       + addUser(Customer): void
+    }
+    
+
+
     class Account{
-        + owner: Customer
         + balance: float
         + monthly_interest: float
         + virtual deposit(float amount): void
@@ -20,6 +30,7 @@ classDiagram
     class Customer{
         + name: string
         + address: string
+        + accounts: vector~Account~
     }
 
 

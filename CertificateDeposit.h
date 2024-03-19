@@ -12,9 +12,9 @@ private:
 
 public:
   // Constructor initializing base class Account and additional attributes
-  CertificateDeposit(Customer owner, float balance, float monthly_interest,
-                     int term, float withdrawal_penalty)
-      : Account(owner, balance, monthly_interest), term(term),
+  CertificateDeposit(float balance, float monthly_interest, int term,
+                     float withdrawal_penalty)
+      : Account(balance, monthly_interest), term(term),
         withdrawal_penalty(withdrawal_penalty) {}
 };
 
