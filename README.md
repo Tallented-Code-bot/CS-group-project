@@ -61,5 +61,6 @@ classDiagram
     Account <|-- CD
     Account <|-- MoneyMarket
     Customer *-- Account
+    Bank *-- Customer
 
 ```

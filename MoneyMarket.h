@@ -17,6 +17,11 @@ public:
       : Account(balance, monthly_interest),
         withdrawal_penalty(withdrawal_penalty),
         maturity_penalty(maturity_penalty) {}
+
+  virtual std::string getName() { return "Money Market"; }
+
+  void read(std::istream &f);
+  void write(std::ostream &f);
 };
 
 #endif

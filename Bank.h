@@ -12,6 +12,10 @@ private:
 
 public:
   void addUser(Customer user);
+  std::vector<Customer> getUsers();
+  Customer getUser(int i);
+  void deleteUser(int i);
+  void setUser(int i, Customer user);
 };
 
 #endif

@@ -27,8 +27,17 @@ public:
 
   void addAccount(Account account) { accounts.push_back(account); }
   std::vector<Account> getAccounts() { return accounts; }
+  Account getAccount(int i) { return accounts[i]; }
+  void deleteAccount(int i) { accounts.erase(accounts.begin() + i); }
+  void setAccount(int i, Account account);
 
   float netWorth();
+
+  // This allows us to sort by name
+  bool operator<(Customer other) { return name < other.name; }
+
+  void write(std::ostream &f);
+  void read(std::istream &f);
 };
 
 #endif

@@ -16,6 +16,11 @@ public:
                      float withdrawal_penalty)
       : Account(balance, monthly_interest), term(term),
         withdrawal_penalty(withdrawal_penalty) {}
+
+  virtual std::string getName() { return "Certificate of Deposit"; }
+
+  void read(std::istream &f);
+  void write(std::ostream &f);
 };
 
 #endif

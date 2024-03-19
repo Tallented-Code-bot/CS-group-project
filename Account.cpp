@@ -16,3 +16,15 @@ void Account::withdraw(float amount) {
                                          // insufficient
   }
 }
+
+std::string Account::getName() { return "Generic Account"; }
+
+void Account::write(std::ostream &f) {
+  f.write((char *)&balance, sizeof(balance));
+  f.write((char *)&monthly_interest, sizeof(monthly_interest));
+}
+
+void Account::read(std::istream &f) {
+  f.read((char *)&balance, sizeof(balance));
+  f.read((char *)&monthly_interest, sizeof(monthly_interest));
+}
