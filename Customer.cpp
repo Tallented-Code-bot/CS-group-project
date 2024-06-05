@@ -41,14 +41,14 @@ void Customer::read(std::istream &f) {
   f.read(data, size);
   data[size] = '\0';
   name = data;
-  delete data;
+  delete[] data;
 
   f.read((char *)&size, sizeof(size));
   data = new char[size + 1];
   f.read(data, size);
   data[size] = '\0';
   address = data;
-  delete data;
+  delete[] data;
 
   f.read((char *)&size, sizeof(size));
   accounts = std::vector<Account>(size);

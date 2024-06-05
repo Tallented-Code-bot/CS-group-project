@@ -110,11 +110,11 @@ int selectCustomer(vector<Customer> users) {
     clearScreen();
     cout << "Select customer: \n";
 
-    for (int i = 0; i < users.size(); i++) {
+    for (long unsigned int i = 0; i < users.size(); i++) {
       cout << "(" << (i + 1) << ") " << users[i].getName() << "\n";
     }
 
-    int selection;
+    long unsigned int selection;
     cin >> selection;
 
     if (selection >= 1 && selection <= users.size()) {
@@ -132,12 +132,12 @@ int selectAccount(vector<Account> accounts) {
     clearScreen();
     cout << "Select account: \n";
 
-    for (int i = 0; i < accounts.size(); i++) {
+    for (long unsigned int i = 0; i < accounts.size(); i++) {
       cout << "(" << (i + 1) << ") " << accounts[i].getName() << ": $"
            << accounts[i].getBalance() << "\n";
     }
 
-    int selection;
+    long unsigned int selection;
     cin >> selection;
 
     if (selection >= 1 && selection <= accounts.size()) {
