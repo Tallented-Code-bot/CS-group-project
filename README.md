@@ -2,7 +2,7 @@
 
 ([Link to Github](https://github.com/Tallented-Code-bot/CS-group-project))
 
-This is the CS 162 group project, by Calvin Tallent and Dimitriy Shvets.
+
 
 
 
@@ -12,19 +12,19 @@ This is the CS 162 group project, by Calvin Tallent and Dimitriy Shvets.
 ``` mermaid
 classDiagram
     class Bank{
-        - users: vector<Customer>
+        - users: vector~Customer~
         - filename: string
         - penaltiesLastProcessed: time_point
         + addUser(Customer)
-        + getUsers(): vector<Customer>
-        + getUser(int): Customer
+        + getUsers() vector~Customer~
+        + getUser(int) Customer
         + deleteUser(int)
         + setUser(int, Customer)
         + write(ostream &)
         + read(istream &)
         + save()
         + processPenalties()
-        + getPenaltiesLastProcessed(): time_point
+        + getPenaltiesLastProcessed() time_point
     }
 
 
@@ -32,22 +32,23 @@ classDiagram
     class Account{
         # balance: float
         # monthly_interest: float
-        + virtual deposit(float): Transaction
-        + virtual withdraw(float): Transaction
+        + virtual deposit(float) Transaction
+        + virtual withdraw(float) Transaction
 
-        + getBalance(): float
-        + getName(): string
-        + getType(): AccountType
+        + getBalance() float
+        + getName() string
+        + getType() AccountType
 
         + write(ostream &)
         + read(istream &)
 
-        + operator<(Account): bool
+        + operator~(Account) bool
 
-        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper~Transaction~)
     }
 
-    enum AccountType{
+    class AccountType{
+    ~~enumeration~~
     + GENERIC_ACCOUNT
     + CERTIFICATE_DEPOSIT
     + CHECKING
@@ -60,25 +61,25 @@ classDiagram
     class Customer{
         - name: string
         - address: string
-        - accounts: vector<Account *>
-        - transactions: PriorityQueueWrapper<Transaction>
+        - accounts: vector~Account *~
+        - transactions: PriorityQueueWrapper~Transaction~
 
-        + getName(): string
-        + getAddress(): string
+        + getName() string
+        + getAddress() string
         + setName(string)
         + setAddress(string)
 
         + addAccount(Account)
-        + getAccounts(): &vector<Account>
-        + getAccount(int): &Account
+        + getAccounts() &vector~Account~
+        + getAccount(int) &Account
         + deleteAccount(int)
 
-        + getTransactions(): &PriorityQueueWrapper<Transaction>
+        + getTransactions() &PriorityQueueWrapper~Transaction~
 
         + withdraw(int, float)
         + deposit(int, float)
 
-        + netWorth(): float
+        + netWorth() float
 
         + write(ostream &)
         + read(istream &)
@@ -86,24 +87,24 @@ classDiagram
 
 
     class Checking{
-        + getName(): string
-        + getType(): AccountType
+        + getName() string
+        + getType() AccountType
 
         + write(ostream &)
         + read(istream &)
 
-        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper~Transaction~)
     }
 
     class Savings{
         - withdrawal_penalty: float
-        + getName(): string
-        + getType(): AccountType
+        + getName() string
+        + getType() AccountType
 
         + write(ostream &)
         + read(istream &)
 
-        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper~Transaction~)
     }
 
 
@@ -112,26 +113,26 @@ classDiagram
         - months: int
         - withdrawal_penalty: float
 
-        + getName(): string
-        + getType(): AccountType
+        + getName() string
+        + getType() AccountType
 
         + write(ostream &)
         + read(istream &)
 
-        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper~Transaction~)
     }
 
     class MoneyMarket{
         - withdrawal_penalty: float
         - maturity_penalty: float
 
-        + getName(): string
-        + getType(): AccountType
+        + getName() string
+        + getType() AccountType
 
         + write(ostream &)
         + read(istream &)
 
-        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper~Transaction~)
     }
 
 
@@ -142,11 +143,11 @@ classDiagram
         - amount: float
         - shouldProcess: bool
 
-        + getAmount(): float
-        + getIndex(): size_t
-        + getType(): TransactionType
-        + getDatetime(): time_point
-        + getShouldProcess(): bool
+        + getAmount() float
+        + getIndex() size_t
+        + getType() TransactionType
+        + getDatetime() time_point
+        + getShouldProcess() bool
 
         + setAmount(float)
         + setIndex(int)
@@ -155,29 +156,30 @@ classDiagram
 
         + process()
 
-        + operator<(Transaction): bool
-        + operator>(Transaction): bool
-        + operator==(Transaction): bool
+        + operator~(Transaction) bool
+        + operator~(Transaction) bool
+        + operator==(Transaction) bool
 
         + write(&ostream)
         + read(&istream)
     }
 
-    enum TransactionType{
+    class TransactionType{
+    ~~enumerate~~
     + DEBIT
     + CREDIT
     }
 
 
 
-    Checking -|> Account
+    Checking --|> Account
     Savings --|> Account
     Account <|-- CD
     Account <|-- MoneyMarket
-    Customer *--- Account
-    Customer *- Transaction
-    Bank *- Customer
-    Account *- AccountType
+    Customer *-- Account
+    Customer *-- Transaction
+    Bank *-- Customer
+    Account *-- AccountType
     TransactionType --* Transaction
 
 ```
