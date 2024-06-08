@@ -1,56 +1,154 @@
+// Customer.cpp
+// Calvin Tallent
+
 #include "Customer.h"
 #include "Account.h"
+#include "CertificateDeposit.cpp"
+#include "CertificateDeposit.h"
+#include "Checking.h"
+#include "MoneyMarket.cpp"
+#include "MoneyMarket.h"
+#include "Savings.cpp"
+#include "Savings.h"
+#include "Transaction.h"
 #include <fstream>
+#include <queue>
 
 float Customer::netWorth() {
   float sum = 0;
-  for (Account account : accounts) {
-    sum += account.getBalance();
+  for (Account *account : accounts) {
+    sum += account->getBalance();
   }
   return sum;
 }
 
-void Customer::setAccount(int i, Account account) { accounts[i] = account; }
+void Customer::withdraw(int account, float amount) {
+  Transaction t = accounts[account]->withdraw(amount);
+  t.setIndex(account);
+
+  transactions.push(t);
+}
+
+void Customer::deposit(int account, float amount) {
+  Transaction t = accounts[account]->deposit(amount);
+  t.setIndex(account);
+
+  transactions.push(t);
+}
+
+// void Customer::setAccount(int i, Account account) { accounts[i] = account; }
 
 void Customer::write(std::ostream &f) {
-  std::size_t size;
+  // Write customer header
+  std::string header("START_CUSTOMER");
+  size_t headerSize = header.size();
+  f.write((char *)&headerSize, sizeof(headerSize));
+  f.write((char *)&header[0], headerSize);
 
-  size = name.size();
-  f.write((char *)&size, sizeof(size_t));
-  f.write((char *)name.c_str(), size);
+  // write name and address
+  size_t nameSize = name.size();
+  size_t addressSize = address.size();
+  f.write((char *)&nameSize, sizeof(nameSize));
+  f.write((char *)&addressSize, sizeof(addressSize));
+  f.write((char *)&name[0], nameSize);
+  f.write((char *)&address[0], addressSize);
 
-  size = address.size();
-  f.write((char *)&size, sizeof(size_t));
-  f.write((char *)address.c_str(), size);
+  // write accounts
+  size_t numAccounts = accounts.size();
+  f.write((char *)&numAccounts, sizeof(numAccounts));
+  for (size_t i = 0; i < numAccounts; i++) {
+    int accountType = accounts[i]->getType();
+    f.write((char *)&accountType, sizeof(accountType));
 
-  size = accounts.size();
-  f.write((char *)&size, sizeof(size_t));
-  f.write((char *)&accounts[0], size * sizeof(Account));
-  // for (int i = 0; i < size; i++) {
-  //   accounts[i].write(f);
-  // }
+    accounts[i]->write(f);
+  }
+
+  // write transactions
+  std::priority_queue<Transaction> transactionsClone(transactions);
+  size_t numTransactions = transactionsClone.size();
+  f.write((char *)&numTransactions, sizeof(numTransactions));
+  for (size_t i = 0; i < numTransactions; i++) {
+    transactionsClone.top().write(f);
+    transactionsClone.pop();
+  }
+
+  std::string footer("END_CUSTOMER");
+  size_t footerSize = footer.size();
+  f.write((char *)&footerSize, sizeof(footerSize));
+  f.write((char *)&footer[0], footerSize);
 }
 
 void Customer::read(std::istream &f) {
+  std::string header;
+  size_t headerSize;
+  f.read((char *)&headerSize, sizeof(headerSize));
+  header.resize(headerSize);
+  f.read((char *)&header[0], headerSize);
+  if (header != "START_CUSTOMER") {
+    throw std::runtime_error("Cannot parse customer header");
+  }
 
-  size_t size;
-  char *data;
+  // read name and address
+  size_t nameSize;
+  size_t addressSize;
+  f.read((char *)&nameSize, sizeof(nameSize));
+  f.read((char *)&addressSize, sizeof(addressSize));
+  name.resize(nameSize);
+  address.resize(addressSize);
+  f.read((char *)&name[0], nameSize);
+  f.read((char *)&address[0], addressSize);
 
-  f.read((char *)&size, sizeof(size));
-  data = new char[size + 1];
-  f.read(data, size);
-  data[size] = '\0';
-  name = data;
-  delete[] data;
+  // write accounts
+  size_t numAccounts;
+  f.read((char *)&numAccounts, sizeof(numAccounts));
+  accounts.clear();
+  for (size_t i = 0; i < numAccounts; i++) {
+    int accountType;
+    f.read((char *)&accountType, sizeof(accountType));
 
-  f.read((char *)&size, sizeof(size));
-  data = new char[size + 1];
-  f.read(data, size);
-  data[size] = '\0';
-  address = data;
-  delete[] data;
+    Account *a;
 
-  f.read((char *)&size, sizeof(size));
-  accounts = std::vector<Account>(size);
-  f.read((char *)&accounts[0], size * sizeof(Account));
+    switch (accountType) {
+    case GENERIC_ACCOUNT:
+      a = new Account();
+      break;
+    case CHECKING:
+      a = new Checking();
+      break;
+    case SAVINGS:
+      a = new Savings();
+      break;
+    case MONEYMARKET:
+      a = new MoneyMarket();
+      break;
+    case CERTIFICATE_DEPOSIT:
+      a = new CertificateDeposit();
+      break;
+    }
+
+    a->read(f);
+    accounts.push_back(a);
+  }
+
+  // read transactions
+  size_t numTransactions;
+  f.read((char *)&numTransactions, sizeof(numTransactions));
+  while (!transactions.empty()) {
+    transactions.pop();
+  }
+  for (size_t i = 0; i < numTransactions; i++) {
+    Transaction t;
+    t.read(f);
+    transactions.push(t);
+  }
+
+  std::string footer;
+  size_t footerSize;
+  f.read((char *)&footerSize, sizeof(footerSize));
+  footer.resize(footerSize);
+  f.read((char *)&footer[0], footerSize);
+
+  if (footer != "END_CUSTOMER") {
+    throw std::runtime_error("Cannot parse customer footer");
+  }
 }

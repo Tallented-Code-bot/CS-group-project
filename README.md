@@ -12,55 +12,172 @@ This is the CS 162 group project, by Calvin Tallent and Dimitriy Shvets.
 ``` mermaid
 classDiagram
     class Bank{
-       + users: vector~Customer~
-       + addUser(Customer): void
+        - users: vector<Customer>
+        - filename: string
+        - penaltiesLastProcessed: time_point
+        + addUser(Customer)
+        + getUsers(): vector<Customer>
+        + getUser(int): Customer
+        + deleteUser(int)
+        + setUser(int, Customer)
+        + write(ostream &)
+        + read(istream &)
+        + save()
+        + processPenalties()
+        + getPenaltiesLastProcessed(): time_point
     }
-    
+
 
 
     class Account{
-        + balance: float
-        + monthly_interest: float
-        + virtual deposit(float amount): void
-        + virtual withdraw(float amount): void
+        # balance: float
+        # monthly_interest: float
+        + virtual deposit(float): Transaction
+        + virtual withdraw(float): Transaction
+
+        + getBalance(): float
+        + getName(): string
+        + getType(): AccountType
+
+        + write(ostream &)
+        + read(istream &)
+
+        + operator<(Account): bool
+
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+    }
+
+    enum AccountType{
+    + GENERIC_ACCOUNT
+    + CERTIFICATE_DEPOSIT
+    + CHECKING
+    + MONEYMARKET
+    + SAVINGS
     }
 
 
 
     class Customer{
-        + name: string
-        + address: string
-        + accounts: vector~Account~
+        - name: string
+        - address: string
+        - accounts: vector<Account *>
+        - transactions: PriorityQueueWrapper<Transaction>
+
+        + getName(): string
+        + getAddress(): string
+        + setName(string)
+        + setAddress(string)
+
+        + addAccount(Account)
+        + getAccounts(): &vector<Account>
+        + getAccount(int): &Account
+        + deleteAccount(int)
+
+        + getTransactions(): &PriorityQueueWrapper<Transaction>
+
+        + withdraw(int, float)
+        + deposit(int, float)
+
+        + netWorth(): float
+
+        + write(ostream &)
+        + read(istream &)
     }
 
 
     class Checking{
+        + getName(): string
+        + getType(): AccountType
 
+        + write(ostream &)
+        + read(istream &)
+
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
     }
 
     class Savings{
-        + withdrawal_penalty: float
+        - withdrawal_penalty: float
+        + getName(): string
+        + getType(): AccountType
+
+        + write(ostream &)
+        + read(istream &)
+
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
     }
 
 
 
     class CD{
-        + term: int
-        + withdrawal_penalty: float
+        - months: int
+        - withdrawal_penalty: float
+
+        + getName(): string
+        + getType(): AccountType
+
+        + write(ostream &)
+        + read(istream &)
+
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
     }
 
     class MoneyMarket{
-        + withdrawal_penalty: float
-        + maturity_penalty: float
+        - withdrawal_penalty: float
+        - maturity_penalty: float
+
+        + getName(): string
+        + getType(): AccountType
+
+        + write(ostream &)
+        + read(istream &)
+
+        + processPenalties(&Transaction,\n &PriorityQueueWrapper<Transaction>)
+    }
+
+
+    class Transaction{
+        - date: time_point
+        - accountIndex: size_t
+        - type: TransactionType
+        - amount: float
+        - shouldProcess: bool
+
+        + getAmount(): float
+        + getIndex(): size_t
+        + getType(): TransactionType
+        + getDatetime(): time_point
+        + getShouldProcess(): bool
+
+        + setAmount(float)
+        + setIndex(int)
+        + setType(TransactionType)
+        + setDatetime(time_point)
+
+        + process()
+
+        + operator<(Transaction): bool
+        + operator>(Transaction): bool
+        + operator==(Transaction): bool
+
+        + write(&ostream)
+        + read(&istream)
+    }
+
+    enum TransactionType{
+    + DEBIT
+    + CREDIT
     }
 
 
 
-    Account <|-- Checking
-    Account <|-- Savings
+    Checking -|> Account
+    Savings --|> Account
     Account <|-- CD
     Account <|-- MoneyMarket
-    Customer *-- Account
-    Bank *-- Customer
+    Customer *--- Account
+    Customer *- Transaction
+    Bank *- Customer
+    Account *- AccountType
+    TransactionType --* Transaction
 
 ```

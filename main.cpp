@@ -1,3 +1,6 @@
+// main.cpp
+// Calvin Tallent
+
 #include "Account.cpp"
 #include "Account.h"
 #include "Bank.cpp"
@@ -8,10 +11,13 @@
 #include "Customer.h"
 #include "MoneyMarket.h"
 #include "Savings.h"
+#include "Transaction.h"
 #include "Util.cpp"
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <iostream>
+#include <queue>
 
 using namespace std;
 
@@ -23,6 +29,9 @@ void clearScreen() {
 
 // Prints the main menu
 int printMainMenu() {
+  // TODO Make this handle non-numbers. Currently when a non-number is entered
+  // `cin` does not consume it, so the function enters an infinite loop of
+  // redrawing.
 
   while (true) {
     clearScreen();
@@ -43,14 +52,16 @@ int printMainMenu() {
 Customer addCustomer() {
   clearScreen();
 
+  cin.ignore(); // flush input buffer, get rid of remaining '\n's
+
   cout << "Add a customer:\n\n";
 
   string name;
-  cout << "Please enter your name: ";
+  cout << "Please enter your name: \n";
   getline(cin, name);
 
   string address;
-  cout << "Please enter your address: ";
+  cout << "Please enter your address: \n";
   getline(cin, address);
 
   Customer c(name, address);
@@ -61,7 +72,7 @@ Customer addCustomer() {
   return c;
 }
 
-Account addAccount() {
+Account *addAccount() {
 
   int selection;
   while (true) {
@@ -85,19 +96,19 @@ Account addAccount() {
 
   // TODO Replace these zeros
 
-  Account a;
+  Account *a;
   switch (selection) {
   case 1:
-    a = Checking(balance, 0);
+    a = new Checking(balance, 0);
     break;
   case 2:
-    a = Savings(balance, 0, 0);
+    a = new Savings(balance, 0, 0);
     break;
   case 3:
-    a = CertificateDeposit(balance, 0, 0, 0);
+    a = new CertificateDeposit(balance, 0, 0, 0);
     break;
   case 4:
-    a = MoneyMarket(balance, 0, 0, 0);
+    a = new MoneyMarket(balance, 0, 0, 0);
     break;
   }
 
@@ -109,6 +120,9 @@ int selectCustomer(vector<Customer> users) {
   while (true) {
     clearScreen();
     cout << "Select customer: \n";
+    if (users.size() == 0) {
+      return -1;
+    }
 
     for (long unsigned int i = 0; i < users.size(); i++) {
       cout << "(" << (i + 1) << ") " << users[i].getName() << "\n";
@@ -124,7 +138,7 @@ int selectCustomer(vector<Customer> users) {
 }
 
 // Create the menu to select an account
-int selectAccount(vector<Account> accounts) {
+int selectAccount(vector<Account *> accounts) {
   if (accounts.size() == 0) {
     return -1;
   }
@@ -133,8 +147,8 @@ int selectAccount(vector<Account> accounts) {
     cout << "Select account: \n";
 
     for (long unsigned int i = 0; i < accounts.size(); i++) {
-      cout << "(" << (i + 1) << ") " << accounts[i].getName() << ": $"
-           << accounts[i].getBalance() << "\n";
+      cout << "(" << (i + 1) << ") " << accounts[i]->getName() << ": $"
+           << accounts[i]->getBalance() << "\n";
     }
 
     long unsigned int selection;
@@ -158,7 +172,7 @@ void accountMenu(Customer &c, int accountId) {
     cout << "(1) Deposit to account\n";
     cout << "(2) Withdraw from account\n";
     cout << "(3) Delete account\n";
-    cout << "(4) Go home\n";
+    cout << "(4) Go back\n";
 
     int selection;
     cin >> selection;
@@ -171,10 +185,7 @@ void accountMenu(Customer &c, int accountId) {
       float a;
       cin >> a;
 
-      Account account = c.getAccount(accountId);
-      account.deposit(a);
-
-      c.setAccount(accountId, account);
+      c.deposit(accountId, a);
 
       break;
     }
@@ -185,9 +196,7 @@ void accountMenu(Customer &c, int accountId) {
       float b;
       cin >> b;
 
-      Account account = c.getAccount(accountId);
-      account.withdraw(b);
-      c.setAccount(accountId, account);
+      c.withdraw(accountId, b);
 
       break;
     }
@@ -201,14 +210,38 @@ void accountMenu(Customer &c, int accountId) {
 }
 
 void customerMenu(Bank &b, int customerId) {
+  if (customerId == -1) {
+    return;
+  }
   while (true) {
     clearScreen();
     cout << b.getUser(customerId).getName() << ":\n\n";
 
+    vector<Account *> accounts = b.getUser(customerId).getAccounts();
+
+    for (size_t i = 0; i < accounts.size(); i++) {
+      cout << "  " << accounts[i]->getName() << ": $"
+           << accounts[i]->getBalance() << "\n";
+
+      priority_queue<Transaction> transactions =
+          b.getUser(customerId).getTransactions();
+
+      while (transactions.size() > 0) {
+        Transaction t = transactions.top();
+        transactions.pop();
+
+        if (i == t.getIndex()) {
+          cout << "  - " << t.getDatetime() << " UTC "
+               << (t.getType() == 0 ? "DEBIT" : "CREDIT") << " $"
+               << t.getAmount() << "\n";
+        }
+      }
+    }
+
     cout << "(1) Add account\n";
     cout << "(2) Select account\n";
     cout << "(3) Delete user\n";
-    cout << "(4) Go home\n";
+    cout << "(4) Go back\n";
 
     int selection;
     cin >> selection;
@@ -221,6 +254,7 @@ void customerMenu(Bank &b, int customerId) {
 
       user.addAccount(addAccount());
       b.setUser(customerId, user);
+      b.save();
       break;
     }
     case 2: // Select account
@@ -228,10 +262,12 @@ void customerMenu(Bank &b, int customerId) {
       Customer user = b.getUser(customerId);
       accountMenu(user, selectAccount(b.getUser(customerId).getAccounts()));
       b.setUser(customerId, user);
+      b.save();
       break;
     }
     case 3: // Delete user
       b.deleteUser(customerId);
+      b.save();
       return;
     case 4: // Go home
       return;
@@ -249,11 +285,11 @@ void printOverview(Bank &b) {
   for (Customer user : users) {
     cout << user.getName() << "\n";
 
-    vector<Account> accounts = user.getAccounts();
+    vector<Account *> accounts = user.getAccounts();
     sort(accounts.begin(), accounts.end());
 
-    for (Account account : accounts) {
-      cout << "    " << account.getName() << ": " << account.getBalance()
+    for (Account *account : accounts) {
+      cout << "    " << account->getName() << ": $" << account->getBalance()
            << "\n";
     }
   }
@@ -264,27 +300,27 @@ void printOverview(Bank &b) {
 }
 
 int main() {
-  Bank b;
+  using namespace std::chrono;
 
-  Customer c("Calvin Tallent", "409 Cherry Blossom Loop");
-  c.addAccount(Checking(500, 0));
-  c.addAccount(Savings(500, 0, 0));
+  Bank b("file.bin");
 
-  b.addUser(c);
-  b.addUser(Customer("Austin Tallent", "409 Cherry Blossom Loop"));
-  b.addUser(Customer("Iain Tallent", "409 Cherry Blossom Loop"));
+  time_t now = system_clock::to_time_t(std::chrono::system_clock::now());
+  time_t lastProcessed = system_clock::to_time_t(b.getPenaltiesLastProcessed());
 
-  std::ofstream file("file.bin");
-  b.getUser(0).write(file);
-  file.close();
+  tm localNow = *localtime(&now);
+  tm localLastProcessed = *localtime(&lastProcessed);
+
+  if (localNow.tm_yday - localLastProcessed.tm_yday >= 1) {
+    b.processPenalties();
+  }
 
   while (true) {
     int mainSelected = printMainMenu();
-    cout << mainSelected << "\n";
 
     switch (mainSelected) {
     case 1: // Add user
       b.addUser(addCustomer());
+      b.save();
       break;
     case 2: // Select user
       customerMenu(b, selectCustomer(b.getUsers()));

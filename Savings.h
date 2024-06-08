@@ -1,4 +1,5 @@
-
+// Savings.h
+// Calvin Tallent
 
 #ifndef SAVINGS_H
 #define SAVINGS_H
@@ -11,14 +12,19 @@ private:
 
 public:
   // Constructor initializing base class Account and additional attributes
-  Savings(float balance, float monthly_interest, float withdrawal_penalty)
+  Savings(float balance = 0, float monthly_interest = 0,
+          float withdrawal_penalty = 0)
       : Account(balance, monthly_interest),
         withdrawal_penalty(withdrawal_penalty) {}
 
-  virtual std::string getName() { return "Savings"; }
+  std::string getName() { return "Savings"; }
 
-  void read(std::istream &f);
+  AccountType getType() { return SAVINGS; }
+
   void write(std::ostream &f);
+  void read(std::istream &f);
+  void processPenalties(Transaction &transaction,
+                        PriorityQueueWrapper<Transaction> &transactions);
 };
 
 #endif

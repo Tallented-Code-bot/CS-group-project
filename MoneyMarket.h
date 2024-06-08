@@ -1,9 +1,12 @@
-
+// MoneyMarket.h
+// Calvin Tallent
 
 #ifndef MONEY_MARKET_H
 #define MONEY_MARKET_H
 
 #include "Account.h"
+#include <istream>
+#include <ostream>
 
 class MoneyMarket : public Account {
 private:
@@ -12,16 +15,20 @@ private:
 
 public:
   // Constructor initializing base class Account and additional attributes
-  MoneyMarket(float balance, float monthly_interest, float withdrawal_penalty,
-              float maturity_penalty)
+  MoneyMarket(float balance = 0, float monthly_interest = 0,
+              float withdrawal_penalty = 0, float maturity_penalty = 0)
       : Account(balance, monthly_interest),
         withdrawal_penalty(withdrawal_penalty),
         maturity_penalty(maturity_penalty) {}
 
-  virtual std::string getName() { return "Money Market"; }
+  std::string getName() { return "Money Market"; }
 
-  void read(std::istream &f);
+  AccountType getType() { return MONEYMARKET; }
+
   void write(std::ostream &f);
-};
+  void read(std::istream &f);
 
+  void processPenalties(Transaction &transaction,
+                        PriorityQueueWrapper<Transaction> &transactions);
+};
 #endif
