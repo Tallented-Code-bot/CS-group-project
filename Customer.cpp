@@ -12,6 +12,7 @@
 #include "Savings.h"
 #include "Transaction.h"
 #include <fstream>
+#include <iterator>
 #include <queue>
 
 float Customer::netWorth() {
@@ -23,14 +24,19 @@ float Customer::netWorth() {
 }
 
 void Customer::withdraw(int account, float amount) {
-  Transaction t = accounts[account]->withdraw(amount);
+  auto front = accounts.begin();
+  std::advance(front, account);
+
+  Transaction t = (*front)->withdraw(amount);
   t.setIndex(account);
 
   transactions.push(t);
 }
 
 void Customer::deposit(int account, float amount) {
-  Transaction t = accounts[account]->deposit(amount);
+  auto front = accounts.begin();
+  std::advance(front, account);
+  Transaction t = (*front)->deposit(amount);
   t.setIndex(account);
 
   transactions.push(t);
@@ -45,22 +51,26 @@ void Customer::write(std::ostream &f) {
   f.write((char *)&headerSize, sizeof(headerSize));
   f.write((char *)&header[0], headerSize);
 
-  // write name and address
-  size_t nameSize = name.size();
+  // write firstName and address
+  size_t firstNameSize = firstName.size();
+  size_t lastNameSize = lastName.size();
   size_t addressSize = address.size();
-  f.write((char *)&nameSize, sizeof(nameSize));
+  f.write((char *)&firstNameSize, sizeof(firstNameSize));
+  f.write((char *)&lastNameSize, sizeof(lastNameSize));
   f.write((char *)&addressSize, sizeof(addressSize));
-  f.write((char *)&name[0], nameSize);
+  f.write((char *)&firstName[0], firstNameSize);
+  f.write((char *)&lastName[0], lastNameSize);
   f.write((char *)&address[0], addressSize);
 
   // write accounts
   size_t numAccounts = accounts.size();
   f.write((char *)&numAccounts, sizeof(numAccounts));
-  for (size_t i = 0; i < numAccounts; i++) {
-    int accountType = accounts[i]->getType();
+  // for (size_t i = 0; i < numAccounts; i++) {
+  for (auto it = accounts.begin(); it != accounts.end(); ++it) {
+    int accountType = (*it)->getType();
     f.write((char *)&accountType, sizeof(accountType));
 
-    accounts[i]->write(f);
+    (*it)->write(f);
   }
 
   // write transactions
@@ -89,13 +99,17 @@ void Customer::read(std::istream &f) {
   }
 
   // read name and address
-  size_t nameSize;
+  size_t firstNameSize;
+  size_t lastNameSize;
   size_t addressSize;
-  f.read((char *)&nameSize, sizeof(nameSize));
+  f.read((char *)&firstNameSize, sizeof(firstNameSize));
+  f.read((char *)&lastNameSize, sizeof(lastNameSize));
   f.read((char *)&addressSize, sizeof(addressSize));
-  name.resize(nameSize);
+  firstName.resize(firstNameSize);
+  lastName.resize(lastNameSize);
   address.resize(addressSize);
-  f.read((char *)&name[0], nameSize);
+  f.read((char *)&firstName[0], firstNameSize);
+  f.read((char *)&lastName[0], lastNameSize);
   f.read((char *)&address[0], addressSize);
 
   // write accounts

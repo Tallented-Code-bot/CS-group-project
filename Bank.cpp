@@ -3,19 +3,39 @@
 
 #include "Bank.h"
 #include "Account.h"
+#include "Customer.h"
 #include "Transaction.h"
 #include "Util.cpp"
+#include <iterator>
+#include <list>
 #include <queue>
 #include <system_error>
-#include <vector>
 
 void Bank::addUser(Customer user) { users.push_back(user); }
 
-std::vector<Customer> Bank::getUsers() { return users; }
-Customer Bank::getUser(int i) { return users[i]; }
-void Bank::deleteUser(int i) { users.erase(users.begin() + i); }
+std::list<Customer> Bank::getUsers() { return users; }
+Customer Bank::getUser(int i) {
 
-void Bank::setUser(int i, Customer user) { users[i] = user; }
+  auto front = users.begin();
+  std::advance(front, i);
+  return *front;
+
+  // return users[i];
+}
+void Bank::deleteUser(int i) {
+  auto front = users.begin();
+  std::advance(front, i);
+  users.erase(front);
+  // users->erase(front);
+}
+
+void Bank::setUser(int i, Customer user) {
+  auto front = users.begin();
+  std::advance(front, i);
+
+  *front = user;
+  // users[i] = user;
+}
 
 void Bank::write(std::ostream &f) {
   std::string header("START_BANK");
@@ -25,8 +45,8 @@ void Bank::write(std::ostream &f) {
 
   size_t numCustomers = users.size();
   f.write((char *)&numCustomers, sizeof(numCustomers));
-  for (size_t i = 0; i < users.size(); i++) {
-    users[i].write(f);
+  for (auto it = users.begin(); it != users.end(); ++it) {
+    it->write(f);
   }
 
   f.write((char *)&penaltiesLastProcessed, sizeof(penaltiesLastProcessed));
@@ -73,7 +93,7 @@ void Bank::processPenalties() {
   // - get list of transactions
   // - for each transaction
   // - - customerAccount[transactionIndex]
-  //      .processPenalties(&transaction,&vector<transaction>);
+  //      .processPenalties(&transaction,&list<transaction>);
 
   for (Customer customer : users) {
     for (size_t i = 0; i < customer.getTransactions().size(); i++) {

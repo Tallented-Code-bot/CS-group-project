@@ -12,11 +12,11 @@
 ``` mermaid
 classDiagram
     class Bank{
-        - users: vector~Customer~
+        - users: list~Customer~
         - filename: string
         - penaltiesLastProcessed: time_point
         + addUser(Customer)
-        + getUsers() vector~Customer~
+        + getUsers() list~Customer~
         + getUser(int) Customer
         + deleteUser(int)
         + setUser(int, Customer)
@@ -61,7 +61,7 @@ classDiagram
     class Customer{
         - name: string
         - address: string
-        - accounts: vector~Account *~
+        - accounts: list~Account *~
         - transactions: PriorityQueueWrapper~Transaction~
 
         + getName() string
@@ -70,7 +70,7 @@ classDiagram
         + setAddress(string)
 
         + addAccount(Account)
-        + getAccounts() &vector~Account~
+        + getAccounts() &list~Account~
         + getAccount(int) &Account
         + deleteAccount(int)
 

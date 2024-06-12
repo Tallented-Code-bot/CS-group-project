@@ -8,7 +8,7 @@
 #include "Transaction.h"
 #include <istream>
 #include <ostream>
-#include <vector>
+#include <list>
 
 class Checking : public Account {
 public:

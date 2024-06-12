@@ -56,15 +56,19 @@ Customer addCustomer() {
 
   cout << "Add a customer:\n\n";
 
-  string name;
-  cout << "Please enter your name: \n";
-  getline(cin, name);
+  string firstName;
+  cout << "Please enter your first name: \n";
+  getline(cin, firstName);
+
+  string lastName;
+  cout << "Please enter your last name: \n";
+  getline(cin, lastName);
 
   string address;
   cout << "Please enter your address: \n";
   getline(cin, address);
 
-  Customer c(name, address);
+  Customer c(firstName, lastName, address);
 
   cout << "\n\nAdding customer " << c.getName() << " living at "
        << c.getAddress() << ".";
@@ -116,7 +120,7 @@ Account *addAccount() {
 }
 
 // Create the menu to select a customer
-int selectCustomer(vector<Customer> users) {
+int selectCustomer(list<Customer> users) {
   while (true) {
     clearScreen();
     cout << "Select customer: \n";
@@ -124,8 +128,11 @@ int selectCustomer(vector<Customer> users) {
       return -1;
     }
 
-    for (long unsigned int i = 0; i < users.size(); i++) {
-      cout << "(" << (i + 1) << ") " << users[i].getName() << "\n";
+    // for (long unsigned int i = 0; i < users.size(); i++) {
+    int i = 1;
+    for (auto it = users.begin(); it != users.end(); ++it) {
+      cout << "(" << (i) << ") " << it->getName() << "\n";
+      i++;
     }
 
     long unsigned int selection;
@@ -138,7 +145,7 @@ int selectCustomer(vector<Customer> users) {
 }
 
 // Create the menu to select an account
-int selectAccount(vector<Account *> accounts) {
+int selectAccount(list<Account *> accounts) {
   if (accounts.size() == 0) {
     return -1;
   }
@@ -146,9 +153,12 @@ int selectAccount(vector<Account *> accounts) {
     clearScreen();
     cout << "Select account: \n";
 
-    for (long unsigned int i = 0; i < accounts.size(); i++) {
-      cout << "(" << (i + 1) << ") " << accounts[i]->getName() << ": $"
-           << accounts[i]->getBalance() << "\n";
+    int i = 1;
+    for (auto it = accounts.begin(); it != accounts.end(); ++it) {
+
+      cout << "(" << i << ") " << (*it)->getName() << ": $"
+           << (*it)->getBalance() << "\n";
+      i++;
     }
 
     long unsigned int selection;
@@ -217,11 +227,11 @@ void customerMenu(Bank &b, int customerId) {
     clearScreen();
     cout << b.getUser(customerId).getName() << ":\n\n";
 
-    vector<Account *> accounts = b.getUser(customerId).getAccounts();
+    list<Account *> accounts = b.getUser(customerId).getAccounts();
 
-    for (size_t i = 0; i < accounts.size(); i++) {
-      cout << "  " << accounts[i]->getName() << ": $"
-           << accounts[i]->getBalance() << "\n";
+    size_t i = 0;
+    for (auto it = accounts.begin(); it != accounts.end(); ++it) {
+      cout << "  " << (*it)->getName() << ": $" << (*it)->getBalance() << "\n";
 
       priority_queue<Transaction> transactions =
           b.getUser(customerId).getTransactions();
@@ -236,6 +246,7 @@ void customerMenu(Bank &b, int customerId) {
                << t.getAmount() << "\n";
         }
       }
+      i++;
     }
 
     cout << "(1) Add account\n";
@@ -279,14 +290,14 @@ void customerMenu(Bank &b, int customerId) {
 void printOverview(Bank &b) {
   clearScreen();
 
-  vector<Customer> users = b.getUsers();
-  sort(users.begin(), users.end());
+  list<Customer> users = b.getUsers();
+  users.sort();
 
   for (Customer user : users) {
     cout << user.getName() << "\n";
 
-    vector<Account *> accounts = user.getAccounts();
-    sort(accounts.begin(), accounts.end());
+    list<Account *> accounts = user.getAccounts();
+    accounts.sort();
 
     for (Account *account : accounts) {
       cout << "    " << account->getName() << ": $" << account->getBalance()

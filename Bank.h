@@ -13,11 +13,11 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
-#include <vector>
+#include <list>
 
 class Bank {
 private:
-  std::vector<Customer> users;
+  std::list<Customer> users;
   std::string filename;
   std::chrono::system_clock::time_point penaltiesLastProcessed;
 
@@ -42,7 +42,7 @@ public:
   }
 
   void addUser(Customer user);
-  std::vector<Customer> getUsers();
+  std::list<Customer> getUsers();
   Customer getUser(int i);
   void deleteUser(int i);
   void setUser(int i, Customer user);

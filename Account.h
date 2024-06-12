@@ -8,7 +8,7 @@
 #include "Transaction.h"
 #include "Util.cpp"
 #include <string>
-#include <vector>
+#include <list>
 
 enum AccountType {
   GENERIC_ACCOUNT,
